@@ -1,24 +1,42 @@
 import React, { useState } from "react";
 
 const BlockConfigEditor = ({ initialConfig, onSave, onCancel }) => {
+  const [name, setName] = useState("");
   const [config, setConfig] = useState("");
+  const [generatorStub, setGeneratorStub] = useState("");
 
  
 
   const handleSave = () => {
     // Implement validation or additional logic if needed
-    onSave(config);
+    onSave(name, config, generatorStub);
   };
 
   return (
     <div>
       <textarea
+       value={name}
+       onChange={(e) => setName(e.target.value)}
+       placeholder="Type Block Name here..."  // Placeholder text
+       rows={1}
+       cols={150}  // Adjust the column value to make the textarea wider
+       style={{ borderRadius: '8px', padding: '8px', border: '2px solid #5babde', }}  // Rounded corners and padding
+      />
+      <textarea
        value={config}
        onChange={(e) => setConfig(e.target.value)}
-       placeholder="Type your configuration here..."  // Placeholder text
+       placeholder="Type Block Definition here..."  // Placeholder text
        rows={10}
        cols={150}  // Adjust the column value to make the textarea wider
        style={{ borderRadius: '8px', padding: '8px', border: '2px solid #5babde', }}  // Rounded corners and padding
+      />
+      <textarea
+        value={generatorStub}
+        onChange={(e) => setGeneratorStub(e.target.value)}
+        placeholder="Type Generator Stub here..."  // Placeholder text
+        rows={10}
+        cols={150}  // Adjust the column value to make the textarea wider
+        style={{ borderRadius: '8px', padding: '8px', border: '2px solid #5babde', }}  // Rounded corners and padding
       />
       <button
         onClick={handleSave}
