@@ -34,7 +34,7 @@ export default defineConfig({
     host: true, // needed for the Docker Container port mapping to work
     proxy: {
       "/api": {
-        target: "http://localhost:1337",
+        target: "http://10.136.54.45:1337",
       },
     },
   },
