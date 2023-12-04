@@ -1,15 +1,20 @@
-import React, { useEffect, useRef, useState, useReducer } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../../ActivityLevels.less';
-import { compileArduinoCode, handleUpdateWorkspace,  handleCreatorSaveActivityLevel, handleCreatorSaveActivity } from '../../Utils/helpers';
-import { message, Spin, Row, Col, Alert, Menu, Dropdown } from 'antd';
-import CodeModal from '../modals/CodeModal';
-import ConsoleModal from '../modals/ConsoleModal';
-import PlotterModal from '../modals/PlotterModal';
-import LoadWorkspaceModal from '../modals/LoadWorkspaceModal';
-import SaveAsModal from '../modals/SaveAsModal';
-import DisplayDiagramModal from '../modals/DisplayDiagramModal'
-import StudentToolboxMenu from '../modals/StudentToolboxMenu';
+import React, { useEffect, useRef, useState, useReducer } from "react";
+import { useNavigate } from "react-router-dom";
+import "../../ActivityLevels.less";
+import {
+  compileArduinoCode,
+  handleUpdateWorkspace,
+  handleCreatorSaveActivityLevel,
+  handleCreatorSaveActivity,
+} from "../../Utils/helpers";
+import { message, Spin, Row, Col, Alert, Menu, Dropdown } from "antd";
+import CodeModal from "../modals/CodeModal";
+import ConsoleModal from "../modals/ConsoleModal";
+import PlotterModal from "../modals/PlotterModal";
+import LoadWorkspaceModal from "../modals/LoadWorkspaceModal";
+import SaveAsModal from "../modals/SaveAsModal";
+import DisplayDiagramModal from "../modals/DisplayDiagramModal";
+import StudentToolboxMenu from "../modals/StudentToolboxMenu";
 import {
   connectToPort,
   handleCloseConnection,
@@ -23,7 +28,7 @@ import BlockConfigEditor from "./BlockConfigEditor";
 
 let plotId = 1;
 
-export default function MentorCanvas({ activity, isSandbox, setActivity,  isMentorActivity }) {
+export default function MentorCanvas({ activity, isSandbox, setActivity, isMentorActivity }) {
   const [hoverUndo, setHoverUndo] = useState(false);
   const [hoverRedo, setHoverRedo] = useState(false);
   const [hoverCompile, setHoverCompile] = useState(false);
@@ -34,8 +39,8 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
   const [plotData, setPlotData] = useState([]);
   const [connectionOpen, setConnectionOpen] = useState(false);
   const [selectedCompile, setSelectedCompile] = useState(false);
-  const [compileError, setCompileError] = useState('');
-  const [classroomId, setClassroomId] = useState('');
+  const [compileError, setCompileError] = useState("");
+  const [classroomId, setClassroomId] = useState("");
   const [studentToolbox, setStudentToolbox] = useState([]);
   const [openedToolBoxCategories, setOpenedToolBoxCategories] = useState([]);
   const [showNewBlockModal, setShowNewBlockModal] = useState(false);
@@ -56,8 +61,8 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
     workspaceRef.current.clearUndo();
   };
   const setWorkspace = () => {
-    workspaceRef.current = window.Blockly.inject('blockly-canvas', {
-      toolbox: document.getElementById('toolbox'),
+    workspaceRef.current = window.Blockly.inject("blockly-canvas", {
+      toolbox: document.getElementById("toolbox"),
     });
 
     workspaceRef.current.addChangeListener((event) => {
@@ -74,7 +79,7 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
   useEffect(() => {
     // once the activity state is set, set the workspace and save
     const setUp = async () => {
-      const classroom = sessionStorage.getItem('classroomId');
+      const classroom = sessionStorage.getItem("classroomId");
       setClassroomId(classroom);
       activityRef.current = activity;
       if (!workspaceRef.current && activity && Object.keys(activity).length !== 0) {
@@ -84,9 +89,9 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
         //   window.Blockly.Xml.domToWorkspace(xml, workspaceRef.current);
         // }
         let xml = isMentorActivity
-        ? window.Blockly.Xml.textToDom(activity.activity_template)
-        : window.Blockly.Xml.textToDom(activity.template);
-      window.Blockly.Xml.domToWorkspace(xml, workspaceRef.current);
+          ? window.Blockly.Xml.textToDom(activity.activity_template)
+          : window.Blockly.Xml.textToDom(activity.template);
+        window.Blockly.Xml.domToWorkspace(xml, workspaceRef.current);
         workspaceRef.current.clearUndo();
       }
     };
@@ -116,10 +121,7 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
         toolboxRes.data.toolbox &&
           toolboxRes.data.toolbox.forEach(([category, blocks]) => {
             tempCategories.push(category);
-            tempToolBox = [
-              ...tempToolBox,
-              ...blocks.map((block) => block.name),
-            ];
+            tempToolBox = [...tempToolBox, ...blocks.map((block) => block.name)];
           });
 
         setOpenedToolBoxCategories(tempCategories);
@@ -135,7 +137,7 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
       if (updateRes.err) {
         message.error(updateRes.err);
       } else {
-        message.success('Workspace saved successfully');
+        message.success("Workspace saved successfully");
       }
     }
     // else create a new workspace and update local storage
@@ -145,27 +147,25 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
   };
 
   const handleUndo = () => {
-    if (workspaceRef.current.undoStack_.length > 0)
-      workspaceRef.current.undo(false);
+    if (workspaceRef.current.undoStack_.length > 0) workspaceRef.current.undo(false);
   };
 
   const handleRedo = () => {
-    if (workspaceRef.current.redoStack_.length > 0)
-      workspaceRef.current.undo(true);
+    if (workspaceRef.current.redoStack_.length > 0) workspaceRef.current.undo(true);
   };
 
   const handleConsole = async () => {
     if (showPlotter) {
-      message.warning('Close serial plotter before openning serial monitor');
+      message.warning("Close serial plotter before openning serial monitor");
       return;
     }
     // if serial monitor is not shown
     if (!showConsole) {
       // connect to port
-      await handleOpenConnection(9600, 'newLine');
+      await handleOpenConnection(9600, "newLine");
       // if fail to connect to port, return
-      if (typeof window['port'] === 'undefined') {
-        message.error('Fail to select serial device');
+      if (typeof window["port"] === "undefined") {
+        message.error("Fail to select serial device");
         return;
       }
       setConnectionOpen(true);
@@ -183,21 +183,14 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
 
   const handlePlotter = async () => {
     if (showConsole) {
-      message.warning('Close serial monitor before openning serial plotter');
+      message.warning("Close serial monitor before openning serial plotter");
       return;
     }
 
     if (!showPlotter) {
-      await handleOpenConnection(
-        9600,
-        'plot',
-        plotData,
-        setPlotData,
-        plotId,
-        forceUpdate
-      );
-      if (typeof window['port'] === 'undefined') {
-        message.error('Fail to select serial device');
+      await handleOpenConnection(9600, "plot", plotData, setPlotData, plotId, forceUpdate);
+      if (typeof window["port"] === "undefined") {
+        message.error("Fail to select serial device");
         return;
       }
       setConnectionOpen(true);
@@ -214,18 +207,16 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
 
   const handleCompile = async () => {
     if (showConsole || showPlotter) {
-      message.warning(
-        'Close Serial Monitor and Serial Plotter before uploading your code'
-      );
+      message.warning("Close Serial Monitor and Serial Plotter before uploading your code");
     } else {
-      if (typeof window['port'] === 'undefined') {
+      if (typeof window["port"] === "undefined") {
         await connectToPort();
       }
-      if (typeof window['port'] === 'undefined') {
-        message.error('Fail to select serial device');
+      if (typeof window["port"] === "undefined") {
+        message.error("Fail to select serial device");
         return;
       }
-      setCompileError('');
+      setCompileError("");
       await compileArduinoCode(
         workspaceRef.current,
         setSelectedCompile,
@@ -237,26 +228,18 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
   };
 
   const handleGoBack = () => {
-    if (
-      window.confirm(
-        'All unsaved progress will be lost. Do you still want to go back?'
-      )
-    )
+    if (window.confirm("All unsaved progress will be lost. Do you still want to go back?"))
       navigate(-1);
   };
   const handleCreatorSave = async () => {
     // Save activity template
 
     if (!isSandbox && !isMentorActivity) {
-      const res = await handleCreatorSaveActivityLevel(
-        activity.id,
-        workspaceRef,
-        studentToolbox
-      );
+      const res = await handleCreatorSaveActivityLevel(activity.id, workspaceRef, studentToolbox);
       if (res.err) {
         message.error(res.err);
       } else {
-        message.success('Activity Template saved successfully');
+        message.success("Activity Template saved successfully");
       }
     } else if (!isSandbox && isMentorActivity) {
       // Save activity template
@@ -264,20 +247,16 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
       if (res.err) {
         message.error(res.err);
       } else {
-        message.success('Activity template saved successfully');
+        message.success("Activity template saved successfully");
       }
     } else {
       // if we already have the workspace in the db, just update it.
       if (activity && activity.id) {
-        const updateRes = await handleUpdateWorkspace(
-          activity.id,
-          workspaceRef,
-          studentToolbox
-        );
+        const updateRes = await handleUpdateWorkspace(activity.id, workspaceRef, studentToolbox);
         if (updateRes.err) {
           message.error(updateRes.err);
         } else {
-          message.success('Workspace saved successfully');
+          message.success("Workspace saved successfully");
         }
       }
       // else create a new workspace and update local storage
@@ -292,17 +271,17 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
         <PlotterLogo />
         &nbsp; Show Serial Plotter
       </Menu.Item>
-      <CodeModal title={'XML'} workspaceRef={workspaceRef.current} />
+      <CodeModal title={"XML"} workspaceRef={workspaceRef.current} />
       <Menu.Item>
-        <CodeModal title={'Arduino Code'} workspaceRef={workspaceRef.current} />
+        <CodeModal title={"Arduino Code"} workspaceRef={workspaceRef.current} />
       </Menu.Item>
     </Menu>
   );
 
   const menuSave = (
     <Menu>
-      <Menu.Item id='menu-save' onClick={handleCreatorSave} key='test'>
-        <i className='fa fa-save'/>
+      <Menu.Item id="menu-save" onClick={handleCreatorSave} key="test">
+        <i className="fa fa-save" />
         &nbsp; Save to template
       </Menu.Item>
       <SaveAsModal
@@ -398,127 +377,95 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
 
 
   return (
-    <div id='horizontal-container' className='flex flex-column'>
-      <div className='flex flex-row'>
-        <div
-          id='bottom-container'
-          className='flex flex-column vertical-container overflow-visible'
-        >
+    <div id="horizontal-container" className="flex flex-column">
+      <div className="flex flex-row">
+        <div id="bottom-container" className="flex flex-column vertical-container overflow-visible">
           <Spin
-            tip='Compiling Code Please Wait... It may take up to 20 seconds to compile your code.'
-            className='compilePop'
-            size='large'
-            spinning={selectedCompile}
-          >
-            <Row id='icon-control-panel'>
-              <Col flex='none' id='section-header'>
+            tip="Compiling Code Please Wait... It may take up to 20 seconds to compile your code."
+            className="compilePop"
+            size="large"
+            spinning={selectedCompile}>
+            <Row id="icon-control-panel">
+              <Col flex="none" id="section-header">
                 {activity.lesson_module_name
                   ? `${activity.lesson_module_name} - Activity ${activity.number}`
                   : activity.name
                   ? `Workspace: ${activity.name}`
-                  : 'New Workspace!'}
+                  : "New Workspace!"}
               </Col>
-              <Col flex='auto'>
-                <Row align='middle' justify='end' id='description-container'>
-                  <Col flex={'30px'}>
-                    <button
-                      onClick={handleGoBack}
-                      id='link'
-                      className='flex flex-column'
-                    >
-                      <i id='icon-btn' className='fa fa-arrow-left' />
+              <Col flex="auto">
+                <Row align="middle" justify="end" id="description-container">
+                  <Col flex={"30px"}>
+                    <button onClick={handleGoBack} id="link" className="flex flex-column">
+                      <i id="icon-btn" className="fa fa-arrow-left" />
                     </button>
                   </Col>
-                  <Col flex='auto' />
-                  <Row id='right-icon-container'>
+                  <Col flex="auto" />
+                  <Row id="right-icon-container">
                     {!isSandbox ? (
-                      <Col
-                        className='flex flex-row'
-                        id='save-dropdown-container'
-                      >
+                      <Col className="flex flex-row" id="save-dropdown-container">
                         <Dropdown overlay={menuSave}>
-                          <i id='icon-btn' className='fa fa-save' />
+                          <i id="icon-btn" className="fa fa-save" />
                         </Dropdown>
-                        <i className='fas fa-angle-down' id='caret'></i>
+                        <i className="fas fa-angle-down" id="caret"></i>
                       </Col>
                     ) : null}
-                    <Col className='flex flex-row' id='redo-undo-container'>
-                      <button
-                        onClick={handleUndo}
-                        id='link'
-                        className='flex flex-column'
-                      >
+                    <Col className="flex flex-row" id="redo-undo-container">
+                      <button onClick={handleUndo} id="link" className="flex flex-column">
                         <i
-                          id='icon-btn'
-                          className='fa fa-undo-alt'
+                          id="icon-btn"
+                          className="fa fa-undo-alt"
                           style={
                             workspaceRef.current
                               ? workspaceRef.current.undoStack_.length < 1
-                                ? { color: 'grey', cursor: 'default' }
+                                ? { color: "grey", cursor: "default" }
                                 : null
                               : null
                           }
                           onMouseEnter={() => setHoverUndo(true)}
                           onMouseLeave={() => setHoverUndo(false)}
                         />
-                        {hoverUndo && (
-                          <div className='popup ModalCompile4'>Undo</div>
-                        )}
+                        {hoverUndo && <div className="popup ModalCompile4">Undo</div>}
                       </button>
-                      <button
-                        onClick={handleRedo}
-                        id='link'
-                        className='flex flex-column'
-                      >
+                      <button onClick={handleRedo} id="link" className="flex flex-column">
                         <i
-                          id='icon-btn'
-                          className='fa fa-redo-alt'
+                          id="icon-btn"
+                          className="fa fa-redo-alt"
                           style={
                             workspaceRef.current
                               ? workspaceRef.current.redoStack_.length < 1
-                                ? { color: 'grey', cursor: 'default' }
+                                ? { color: "grey", cursor: "default" }
                                 : null
                               : null
                           }
                           onMouseEnter={() => setHoverRedo(true)}
                           onMouseLeave={() => setHoverRedo(false)}
                         />
-                        {hoverRedo && (
-                          <div className='popup ModalCompile4'>Redo</div>
-                        )}
+                        {hoverRedo && <div className="popup ModalCompile4">Redo</div>}
                       </button>
                     </Col>
-                    <Col className='flex flex-row'>
-                      <div
-                        id='action-btn-container'
-                        className='flex space-around'
-                      >
+                    <Col className="flex flex-row">
+                      <div id="action-btn-container" className="flex space-around">
                         <ArduinoLogo
                           setHoverCompile={setHoverCompile}
                           handleCompile={handleCompile}
                         />
                         {hoverCompile && (
-                          <div className='popup ModalCompile'>
-                            Upload to Arduino
-                          </div>
+                          <div className="popup ModalCompile">Upload to Arduino</div>
                         )}
-                    <DisplayDiagramModal
-                      image={activity.images}
-                    />
+                        <DisplayDiagramModal image={activity.images} />
                         <i
                           onClick={() => handleConsole()}
-                          className='fas fa-terminal hvr-info'
-                          style={{ marginLeft: '6px' }}
+                          className="fas fa-terminal hvr-info"
+                          style={{ marginLeft: "6px" }}
                           onMouseEnter={() => setHoverConsole(true)}
                           onMouseLeave={() => setHoverConsole(false)}
                         />
                         {hoverConsole && (
-                          <div className='popup ModalCompile'>
-                            Show Serial Monitor
-                          </div>
+                          <div className="popup ModalCompile">Show Serial Monitor</div>
                         )}
                         <Dropdown overlay={menu}>
-                          <i className='fas fa-ellipsis-v'></i>
+                          <i className="fas fa-ellipsis-v"></i>
                         </Dropdown>
                       </div>
                     </Col>
@@ -556,8 +503,7 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
         <ConsoleModal
           show={showConsole}
           connectionOpen={connectionOpen}
-          setConnectionOpen={setConnectionOpen}
-        ></ConsoleModal>
+          setConnectionOpen={setConnectionOpen}></ConsoleModal>
         <PlotterModal
           show={showPlotter}
           connectionOpen={connectionOpen}
@@ -576,7 +522,7 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
           activity &&
             activity.toolbox &&
             activity.toolbox.map(([category, blocks]) => (
-              <category name={category} is='Blockly category' key={category}>
+              <category name={category} is="Blockly category" key={category}>
                 {
                   // maps out blocks in category
                   // eslint-disable-next-line
@@ -592,10 +538,9 @@ export default function MentorCanvas({ activity, isSandbox, setActivity,  isMent
       {compileError && (
         <Alert
           message={compileError}
-          type='error'
+          type="error"
           closable
-          onClose={(e) => setCompileError('')}
-        ></Alert>
+          onClose={(e) => setCompileError("")}></Alert>
       )}
     </div>
   );

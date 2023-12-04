@@ -23,19 +23,25 @@ export default function ConsoleModal({
   const [deviceDisconnect, setDeviceDisconnect] = useState(false);
 
   useEffect(() => {
-    navigator.serial.addEventListener('disconnect', (e) => {
-      console.log('device disconnected');
-      window.port = undefined;
-      setConnectionOpen(false);
-      document.getElementById('connect-button').innerHTML = 'Connect';
-      setDeviceDisconnect(true);
-      message.error('Device Disconnected');
-    });
-    navigator.serial.addEventListener('connect', (e) => {
-      setDeviceDisconnect(false);
-      message.success('Device Connected');
-    });
-  }, [deviceDisconnect, setConnectionOpen]);
+    try {
+      console.log('navigator', navigator)
+      navigator.serial.addEventListener('disconnect', (e) => {
+        console.log('device disconnected');
+        window.port = undefined;
+        setConnectionOpen(false);
+        document.getElementById('connect-button').innerHTML = 'Connect';
+        setDeviceDisconnect(true);
+        message.error('Device Disconnected');
+      });
+      navigator.serial.addEventListener('connect', (e) => {
+        setDeviceDisconnect(false);
+        message.success('Device Connected');
+      });
+      
+    } catch(error) {
+      console.log('navigator.serial not supported', error)
+    }
+  }, [deviceDisconnect, setConnectionOpen, navigator]);
 
   const handleKeyPress = async (e) => {
     if (e.key === 'Enter') {

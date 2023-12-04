@@ -16,8 +16,8 @@ import {
 import Message from '../../../Message';
 
 message.config({
-  duration: 2,
-  maxCount: 1,
+  duration: 0,
+  maxCount: 0,
 });
 
 export default function PlotterModal({
@@ -34,19 +34,25 @@ export default function PlotterModal({
   const [forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
-    navigator.serial.addEventListener('disconnect', (e) => {
-      console.log('device disconnected');
-      window.port = undefined;
-      setConnectionOpen(false);
-      document.getElementById('connect-button').innerHTML = 'Connect';
-      setDeviceDisconnect(true);
-      message.error('Device Disconnected');
-    });
-    navigator.serial.addEventListener('connect', (e) => {
-      setDeviceDisconnect(false);
-      message.success('Device Connected');
-    });
-  }, [deviceDisconnect, setConnectionOpen]);
+    try {
+      console.log('navigator', navigator);
+      
+      navigator.serial.addEventListener('disconnect', (e) => {
+        console.log('device disconnected');
+        window.port = undefined;
+        setConnectionOpen(false);
+        document.getElementById('connect-button').innerHTML = 'Connect';
+        setDeviceDisconnect(true);
+        message.error('Device Disconnected');
+      });
+      navigator.serial.addEventListener('connect', (e) => {
+        setDeviceDisconnect(false);
+        message.success('Device Connected');
+      });
+    } catch(err) {
+      console.log('navigator.serial not supported', err)
+    }
+  }, [deviceDisconnect, setConnectionOpen, navigator]);
 
   const handleConnect = async () => {
     if (!connectionOpen) {
