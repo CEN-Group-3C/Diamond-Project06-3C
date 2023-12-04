@@ -1,5 +1,5 @@
 # WARNING: Strapi version is outdated, and requires outdated version of Node
-FROM node:14-alpine3.14
+FROM node:14
 
 # Strapi recommends installing these dependencies
 RUN apk update && \

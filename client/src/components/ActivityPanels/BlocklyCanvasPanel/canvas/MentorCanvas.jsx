@@ -19,10 +19,11 @@ import {
   connectToPort,
   handleCloseConnection,
   handleOpenConnection,
-} from "../../Utils/consoleHelpers";
-import { getAuthorizedWorkspace } from "../../../../Utils/requests";
-import ArduinoLogo from "../Icons/ArduinoLogo";
-import PlotterLogo from "../Icons/PlotterLogo";
+} from '../../Utils/consoleHelpers';
+import { getAuthorizedWorkspace } from '../../../../Utils/requests';
+import ArduinoLogo from '../Icons/ArduinoLogo';
+import PlotterLogo from '../Icons/PlotterLogo';
+import NewBlockModal from "./NewBlockModal";
 import BlockConfigEditor from "./BlockConfigEditor";
 
 let plotId = 1;
@@ -42,19 +43,37 @@ export default function MentorCanvas({ activity, isSandbox, setActivity, isMento
   const [classroomId, setClassroomId] = useState("");
   const [studentToolbox, setStudentToolbox] = useState([]);
   const [openedToolBoxCategories, setOpenedToolBoxCategories] = useState([]);
+  const [showNewBlockModal, setShowNewBlockModal] = useState(false);
+  const [showBlockConfigEditor, setShowBlockConfigEditor] = useState(false);
+  const [showCustomBar, setShowCustomBar] = useState(false);
+  const [customBlocks, setCustomBlocks] = useState([]);
+  const [blockConfig, setBlockConfig] = useState({});
   const [forceUpdate] = useReducer((x) => x + 1, 0);
   const workspaceRef = useRef(null);
   const activityRef = useRef(null);
   const navigate = useNavigate();
 
-  const [showBlockConfigEditor, setShowBlockConfigEditor] = useState(false);
-  const [customBlocks, setCustomBlocks] = useState([]);
-  const [blockConfig, setBlockConfig] = useState({});
 
+  const rerenderWorkspace = () => {
+    workspaceRef.current.clear();
+    let xml = window.Blockly.Xml.textToDom(activityRef.current.template);
+    window.Blockly.Xml.domToWorkspace(xml, workspaceRef.current);
+    workspaceRef.current.clearUndo();
+  };
   const setWorkspace = () => {
     workspaceRef.current = window.Blockly.inject("blockly-canvas", {
       toolbox: document.getElementById("toolbox"),
     });
+
+    workspaceRef.current.addChangeListener((event) => {
+      if (event.type === "create") {
+        workspaceRef.current.updateToolbox(document.getElementById("toolbox"));
+      }
+    });
+
+    const savedCustomBlocks = getCustomBlocks();
+    console.log("savedCustomBlocks", savedCustomBlocks);
+    setCustomBlocks(savedCustomBlocks);
   };
 
   useEffect(() => {
@@ -78,6 +97,7 @@ export default function MentorCanvas({ activity, isSandbox, setActivity, isMento
     };
     setUp();
   }, [activity]);
+
 
   const loadSave = async (workspaceId) => {
     // get the corresponding workspace
@@ -281,10 +301,10 @@ export default function MentorCanvas({ activity, isSandbox, setActivity, isMento
   /**=========== CUSTOM BLOCK CONFIG START ===========*/
   /**=================================================*/
 
-  // Function to handle opening the BlockConfigEditor
+      // Function to handle opening the BlockConfigEditor
   const handleOpenBlockConfigEditor = () => {
-    setShowBlockConfigEditor(true);
-  };
+        setShowBlockConfigEditor(true);
+      };
 
   const getCustomBlocks = () => {
     const customBlocks = [];
@@ -292,7 +312,7 @@ export default function MentorCanvas({ activity, isSandbox, setActivity, isMento
     // TODO: get the custom blocks from the database
 
     return customBlocks;
-  };
+  }
 
   const storeCustomBlock = (config, generatorStub) => {
     // const json = JSON.stringify(config);
@@ -354,6 +374,7 @@ export default function MentorCanvas({ activity, isSandbox, setActivity, isMento
   /**===============================================*/
   /**=========== CUSTOM BLOCK CONFIG END ===========*/
   /**===============================================*/
+
 
   return (
     <div id="horizontal-container" className="flex flex-column">
@@ -452,44 +473,33 @@ export default function MentorCanvas({ activity, isSandbox, setActivity, isMento
                 </Row>
               </Col>
             </Row>
-            <div id="blockly-canvas" />
+            <div id='blockly-canvas' />
             <button className="btn new-block__btn" onClick={handleOpenBlockConfigEditor}>
               Configure Block
             </button>
           </Spin>
-        </div>
-        {!isSandbox && !isMentorActivity && (
-          <StudentToolboxMenu
-            activity={activity}
-            studentToolbox={studentToolbox}
-            setStudentToolbox={setStudentToolbox}
-            openedToolBoxCategories={openedToolBoxCategories}
-            setOpenedToolBoxCategories={setOpenedToolBoxCategories}
-          />
-        )}
-        {/* NEW CODE */}
-
-        {!isMentorActivity && (
-          <div className="flex flex-column">
-            {!showBlockConfigEditor && (
-              <StudentToolboxMenu
-                activity={activity}
-                studentToolbox={studentToolbox}
-                setStudentToolbox={setStudentToolbox}
-                openedToolBoxCategories={openedToolBoxCategories}
-                setOpenedToolBoxCategories={setOpenedToolBoxCategories}
-              />
-            )}
-            {showBlockConfigEditor && (
-              <BlockConfigEditor
-                initialConfig={blockConfig}
-                onSave={handleSaveBlockConfig}
-                onCancel={handleCancelBlockConfig}
-              />
-            )}
           </div>
-        )}
-        {/* END NEW CODE */}
+           {!isMentorActivity && (
+               <div className="flex flex-column">
+                 {!showBlockConfigEditor && (
+                     <StudentToolboxMenu
+                         activity={activity}
+                         studentToolbox={studentToolbox}
+                         setStudentToolbox={setStudentToolbox}
+                         openedToolBoxCategories={openedToolBoxCategories}
+                         setOpenedToolBoxCategories={setOpenedToolBoxCategories}
+                     />
+                 )}
+                 {showBlockConfigEditor && (
+                     <BlockConfigEditor
+                         initialConfig={blockConfig}
+                         onSave={handleSaveBlockConfig}
+                         onCancel={handleCancelBlockConfig}
+                     />
+                 )}
+               </div>
+          )}
+
         <ConsoleModal
           show={showConsole}
           connectionOpen={connectionOpen}
@@ -505,7 +515,8 @@ export default function MentorCanvas({ activity, isSandbox, setActivity, isMento
       </div>
 
       {/* This xml is for the blocks' menu we will provide. Here are examples on how to include categories and subcategories */}
-      <xml id="toolbox" is="Blockly workspace">
+      <xml id='toolbox' is='Blockly workspace'>
+        {console.log("activity.toolbox", activity.toolbox)}
         {
           // Maps out block categories
           activity &&
