@@ -1,5 +1,5 @@
 # WARNING: Strapi version is outdated, and requires outdated version of Node
-FROM node:14-alpine3.14
+FROM node:14
 
 # Strapi recommends installing these dependencies
 RUN apk update && \
@@ -24,4 +24,4 @@ RUN PUBLIC_URL=/api yarn build
 
 # Expose port to host and specify command to run on container start
 EXPOSE 1337
-CMD ["yarn", "start"]
+CMD ["yarn", "start:docker"]
