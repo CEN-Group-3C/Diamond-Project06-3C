@@ -138,5 +138,18 @@ All of the deployments and releases are handled automatically with [GitHub Actio
 
 Before submitting a pull request, rebase the feature branch into the target branch to resolve any merge conflicts.
 
+### Outstanding Work
+Fully Implement storage of blocks beyond local memory
+
+### Built Upon
+-Strapi
+-Google Blockly
+-Built on top of existing CASMM project code repository
+
 - PRs to **master** should squash and merge
 - PRs to all other branches should create a merge commit
+
+### How To Update Database/Server Connections
+
+Login in to Strapi backend localhost:1337/admin
+Use an admin login to login and then use the interface to update any database/server connections
